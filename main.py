@@ -177,8 +177,6 @@ def main():
 
     args = parser.parse_args()
 
-    if args.help:
-        parser.print_help()
     if args.train:
         train()
     if args.label:
