@@ -1,0 +1,11 @@
+numpy
+torch
+jsonlines
+datasets 
+transformers 
+evaluate
+spacy
+tqdm
+python-dotenv
+nltk
+pandas
