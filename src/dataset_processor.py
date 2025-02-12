@@ -3,6 +3,7 @@
 import os
 import re
 import json
+import subprocess
 from tqdm import tqdm
 import jsonlines
 import spacy
@@ -256,7 +257,7 @@ class ProcessDataset:
                         input_data = {
                             "db_id": data[db_id_name],
                             "instruction": INSTRUCTION_PROMPT.format(create_statements),
-                            "context": create_statements,
+                            "context": "\n".join(create_statements),
                             "input": input,
                             "language": data["language"],
                             "output": sql_query,
@@ -264,7 +265,7 @@ class ProcessDataset:
                             "history": [],
                             "count_words_in": self.__count_words(
                                 input.replace("\n\n###Response:", "\n\n###Context:\n")
-                                + create_statements
+                                + "\n".join(create_statements)
                                 + "\n\n###Response:",
                                 data["language"],
                             ),

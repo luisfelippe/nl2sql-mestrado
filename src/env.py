@@ -20,7 +20,7 @@ NUM_EPOCHS = 10
 BATCH_SIZE = 10
 USE_FP16 = False
 
-BASE = "/content/drive/MyDrive/Mestrado/Projeto"
+BASE = "."
 
 DATA_PATH = f"{BASE}/data"
 DATA_OUTPUT_PATH = f"{DATA_PATH}/{DATASET_TARGET}-ajusted"
