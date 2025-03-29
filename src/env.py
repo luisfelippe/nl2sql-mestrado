@@ -1,15 +1,15 @@
 """Variáveis de ambiente para configuração do treinamento e execução do modelo."""
 
 # Nome do dataset alvo, dentre os datasets listados em SQL_DATA_INFO
-DATASET_TARGET = "spider-en"
+DATASET_TARGET = "spider-pt"
 
 # idioma alvo do treinamento para filtro do dataset
-LANGUAGE_TARGET = "EN"
+LANGUAGE_TARGET = "PT"
 
 # MODEL = 'google/flan-t5-large' # quebrou com outofmemory no pytorch na linha de treinamento
 
 # TODO reduzir o batch size para testar
-# MODEL = 'google/flan-t5-base' # quebrou com outofmemory no pytorch na linha de treinamento
+# MODEL = 'google/flan-t5-base'
 MODEL = "google/flan-t5-small"
 
 # controla se deve ou não salvar as épocas durante o treinamento
@@ -17,7 +17,7 @@ SHOULD_SAVE_EPOCH = False
 
 # numero de épocas a ser treinado
 NUM_EPOCHS = 10
-BATCH_SIZE = 10
+BATCH_SIZE = 1
 USE_FP16 = False
 
 BASE = "."
@@ -29,7 +29,7 @@ MODELS_PATH = f"{BASE}/models"
 TRAINNING_PATH = f"{BASE}/training"
 
 OUTPUT_MODEL = f"{MODELS_PATH}/{DATASET_TARGET}-{MODEL.replace('/', '-')}"
-
+OUTPUT_COMMERCIAL_MODEL_PREDICTIONS = f"{MODELS_PATH}/{DATASET_TARGET}-"
 
 PREFIX_ANNOTATED = "annotated-"
 PREFIX_PROCESSED = "processed-"
@@ -113,3 +113,44 @@ The position_id of employee is the foreign key of position_id of position.\
 \n###New Instruction:\n{}\n"""
 
 INPUT_PROMPT = "###Input:\n{}\n\n###Response:"
+
+############# for evaluator #################
+# Flag to disable value evaluation
+DISABLE_VALUE = True
+# Flag to disable distinct in select evaluation
+DISABLE_DISTINCT = True
+
+WHERE_OPS = (
+    "not",
+    "between",
+    "=",
+    ">",
+    "<",
+    ">=",
+    "<=",
+    "!=",
+    "in",
+    "like",
+    "is",
+    "exists",
+)
+AGG_OPS = ("none", "max", "min", "count", "sum", "avg")
+TABLE_TYPE = {
+    "sql": "sql",
+    "table_unit": "table_unit",
+}
+
+LEVELS = ["easy", "medium", "hard", "extra", "all"]
+PARTIAL_TYPES = [
+    "select",
+    "select(no AGG)",
+    "where",
+    "where(no OP)",
+    "group(no Having)",
+    "group",
+    "order",
+    "and/or",
+    "IUEN",
+    "keywords",
+]
+

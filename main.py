@@ -10,12 +10,14 @@ from tqdm import tqdm
 
 from src.env import (
     DATA_OUTPUT_PATH,
+    DATA_PATH,
     DATASET_TARGET,
     OUTPUT_MODEL,
     PREFIX_ONE_SHOT,
     PREFIX_PROCESSED,
     SQL_DATA_INFO,
 )
+from src.evaluation.evaluator import evaluate as evaluator
 
 
 def train():
@@ -142,12 +144,26 @@ def predict():
     print(f"Predições salvas no arquivo {predictions_file}!")
 
 
-def evaluate():
+def evaluate(pred, db, table, etype, output):
     """Avalia as predições."""
 
-    print("Avaliação das predições iniciada...")
-    # ...código de avaliação das predições...
-    print("Avaliação das predições concluída.")
+    print("\n\nAvaliação das predições iniciada...")
+    assert etype in ["all", "exec", "match"], "Unknown evaluation method"
+
+    if db is None:
+        db = os.path.join(DATA_PATH, SQL_DATA_INFO[DATASET_TARGET]["name"], "database")
+
+    if table is None:
+        table = os.path.join(
+            DATA_PATH, SQL_DATA_INFO[DATASET_TARGET]["name"], "tables.json"
+        )
+
+    if output is None:
+        output = os.path.join(OUTPUT_MODEL, "evaluation.json")
+
+    evaluator(pred, db, etype, table, output)
+
+    print("\n\nAvaliação das predições concluída.")
 
 
 def main():
@@ -157,36 +173,67 @@ def main():
         description="Ferramenta para treinamento, marcação, processamento do dataset, \
             predições e avaliação das predições. Use --help para ver todas as opções."
     )
-    parser.add_argument("--train", action="store_true", help="Executa o treinamento.")
-    parser.add_argument("--label", action="store_true", help="Executa a marcação.")
-    parser.add_argument(
-        "--process", action="store_true", help="Executa o processamento do dataset."
+
+    # Utilizando subcomandos para cada ação
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # Subcomando para "train"
+    train_parser = subparsers.add_parser("train", help="Treina o modelo.")
+
+    # Subcomando para "label"
+    label_parser = subparsers.add_parser(
+        "label", help="Anota o dataset que será utilizado no treinamento."
     )
-    parser.add_argument("--predict", action="store_true", help="Executa as predições.")
-    parser.add_argument(
-        "--evaluate", action="store_true", help="Executa a avaliação das predições."
+
+    # Subcomando para "label"
+    predict_parser = subparsers.add_parser(
+        "predict", help="Utiliza o modelo para realizar as predições para a avaliação."
     )
-    parser.add_argument(
+
+    # Subcomando para "process"
+    process_parser = subparsers.add_parser(
+        "process",
+        help="Realiza o pré-processamento do dataset que será utilizado no treinamento.",
+    )
+    process_parser.add_argument(
         "--code-representation",
         action="store_true",
-        help="Usa representação de código no processamento do dataset.",
+        help="Define se o método de processamento deve utilizar code-representation (booleano).",
     )
-    # parser.add_argument(
-    #     "--help", action="store_true", help="Exibe esta mensagem de ajuda."
-    # )
+
+    # Subcomando para "evaluate"
+    evaluate_parser = subparsers.add_parser(
+        "evaluate", help="Avalia o modelo através das métricas definidas."
+    )
+    evaluate_parser.add_argument("pred", help="Caminho do arquivo de predições.")
+    evaluate_parser.add_argument(
+        "db", help="Caminho onde estão os arquivos de banco de dados."
+    )
+    evaluate_parser.add_argument(
+        "table", help="Caminho para o arquivo que contém as informações das tabelas."
+    )
+    evaluate_parser.add_argument(
+        "etype",
+        choices=["all", "exec", "match"],
+        help='Tipo de avaliação: "all", "exec" ou "match".',
+    )
+    evaluate_parser.add_argument(
+        "output", help="Caminho para salvar o resultado da avaliação."
+    )
 
     args = parser.parse_args()
 
-    if args.train:
-        train()
-    if args.label:
+    # Verifica qual subcomando foi chamado e invoca a função correspondente
+    if args.command == "label":
         label()
-    if args.process:
+    elif args.command == "process":
         process_dataset(args.code_representation)
-    if args.predict:
+    elif args.command == "train":
+        train()
+    elif args.command == "predict":
         predict()
-    if args.evaluate:
-        evaluate()
+    elif args.command == "evaluate":
+        evaluate(args.pred, args.db, args.table, args.etype, args.output)
 
 
 if __name__ == "__main__":

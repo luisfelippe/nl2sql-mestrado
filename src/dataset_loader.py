@@ -30,12 +30,12 @@ class DatasetLoader:
             com os datasets de treino, validação e teste."""
         
         # Verifica se o dataset foi processado
-        if not ProcessDataset.verifica_processado():
-            print(
-                "Dataset ainda não foi processado. \
-                    Efetue o processamento antes de carregar o dataset."
-            )
-            return None
+        # if not self.processor.verifica_processado():
+        #     print(
+        #         "Dataset ainda não foi processado. \
+        #             Efetue o processamento antes de carregar o dataset."
+        #     )
+        #     return None
 
         # transforma os dataframes em Dataset para a devida utilização no treinamento
         dataset_dict = {

@@ -109,11 +109,12 @@ class ProcessDataset:
                 datas.extend(jsonlines.open(data_file))
 
         elif table_file.endswith(".json"):
-            with open(table_file) as table:
+            with open(table_file, encoding="utf-8") as table:
                 tables = json.load(table)
                 datas = []
+
                 for data_file in data_file_list:
-                    with open(data_file) as data:
+                    with open(data_file, encoding="utf-8") as data:
                         datas.extend(json.load(data))
         else:
             print("Unsupported file types")
@@ -464,4 +465,6 @@ if __name__ == "__main__":
     )
     process.process(report=False)
 
-    print(f"Finalizado processamento do Dataset!")
+    print(train_file, eval_file, dev_file)
+
+    print("Finalizado processamento do Dataset!")

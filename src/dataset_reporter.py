@@ -15,7 +15,7 @@ class DatasetReport:
         words_in = []
         words_out = []
 
-        with open(file_name, "r") as file:
+        with open(file_name, "r", encoding="utf8") as file:
             dataset = json.load(file)
 
             print(f"Quantidade de amostras: {len(dataset)}")

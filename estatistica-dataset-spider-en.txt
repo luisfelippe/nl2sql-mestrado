@@ -1,0 +1,70 @@
+=======================================
+Relatório de processamento do dataset.
+Dataset: spider-en
+
+Arquivo: ./data/spider-en-ajusted\processed-train_spider.json
+Quantidade de amostras: 6654
+
+Quantidade de amostras fáceis: 1464 = 22.0%
+Quantidade de amostras médias: 3650 = 54.85%
+Quantidade de amostras difíceis: 1387 = 20.84%
+Quantidade de amostras extra difíceis: 153 = 2.3%
+
+Quantidade mínima de palavras no input: 95
+Quantidade máxima de palavras no input: 1871
+Quantidade média de palavras no input: 394.5623685001503
+Quantidade total de palavras no input: 2625418
+Desvio padrão: 320.4231529348974
+
+Quantidade mínima de palavras no output: 4
+Quantidade máxima de palavras no output: 112
+Quantidade média de palavras no output: 20.618274721971748
+Quantidade total de palavras no output: 137194
+Desvio padrão: 12.154874352005702
+=======================================
+
+
+
+Arquivo: ./data/spider-en-ajusted\processed-train_others.json
+Quantidade de amostras: 1659
+
+Quantidade de amostras fáceis: 545 = 32.85%
+Quantidade de amostras médias: 298 = 17.96%
+Quantidade de amostras difíceis: 816 = 49.19%
+Quantidade de amostras extra difíceis: 0 = 0.0%
+
+Quantidade mínima de palavras no input: 181
+Quantidade máxima de palavras no input: 809
+Quantidade média de palavras no input: 519.2151898734177
+Quantidade total de palavras no input: 861378
+Desvio padrão: 146.29447166434915
+
+Quantidade mínima de palavras no output: 5
+Quantidade máxima de palavras no output: 99
+Quantidade média de palavras no output: 37.88065099457504
+Quantidade total de palavras no output: 62844
+Desvio padrão: 19.241405538546555
+=======================================
+
+
+
+Arquivo: ./data/spider-en-ajusted\processed-dev.json
+Quantidade de amostras: 899
+
+Quantidade de amostras fáceis: 214 = 23.8%
+Quantidade de amostras médias: 523 = 58.18%
+Quantidade de amostras difíceis: 138 = 15.35%
+Quantidade de amostras extra difíceis: 24 = 2.67%
+
+Quantidade mínima de palavras no input: 134
+Quantidade máxima de palavras no input: 715
+Quantidade média de palavras no input: 315.39710789766406
+Quantidade total de palavras no input: 283542
+Desvio padrão: 187.51502196399773
+
+Quantidade mínima de palavras no output: 4
+Quantidade máxima de palavras no output: 77
+Quantidade média de palavras no output: 20.057842046718577
+Quantidade total de palavras no output: 18032
+Desvio padrão: 11.881459005136316
+=======================================

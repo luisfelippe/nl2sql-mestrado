@@ -24,7 +24,7 @@ import json
 import sqlite3
 import argparse
 
-from src.spider_lib.process_sql import get_schema, Schema, get_sql
+from src.evaluation.spider_lib.process_sql import get_schema, Schema, get_sql
 
 # Flag to disable value evaluation
 DISABLE_VALUE = True

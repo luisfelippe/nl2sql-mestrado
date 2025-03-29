@@ -39,6 +39,7 @@ class ModelTrainer:
     """Classe responsável por treinar o modelo."""
 
     def __init__(self):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained(MODEL)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(MODEL)
 
@@ -52,7 +53,7 @@ class ModelTrainer:
             # ajusta para o t5 invertendo o posicionamento do contexto com o input
             input.replace("\n\n###Response:", "\n\n###Context:\n")
             + context
-            + "\n\n###Response:"
+            + "\n\n###Response: "
             for context, input in zip(examples["context"], examples["input"])
         ]
         targets = [sql for sql in examples["output"]]
@@ -149,7 +150,11 @@ class ModelTrainer:
         train_encoded_dataset = tokenized_datasets["train"]
         validation_encoded_dataset = tokenized_datasets["validation"]
 
+        print(f"Utilizando o dispositivo: {self.device}")
+
         # 6. Inicializar o Trainer
+        self.model.to(self.device)
+
         ft_trainer = Seq2SeqTrainer(
             model=self.model,
             args=train_args,
@@ -175,7 +180,8 @@ class ModelTrainer:
         # 8. Salvar o modelo fine-tuned
         ft_trainer.save_model(OUTPUT_MODEL)
 
-        print("\n\n***Finetunning Complete!***")
+        print(f"\n\n***Model Saved in {OUTPUT_MODEL}")
+        print("\n***Finetunning Complete!***")
 
 
 if __name__ == "__main__":
