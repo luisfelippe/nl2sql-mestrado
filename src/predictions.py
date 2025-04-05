@@ -7,6 +7,8 @@ from langchain_huggingface import HuggingFacePipeline
 from langchain_openai import ChatOpenAI
 import torch
 from tqdm import tqdm
+
+from unsloth import FastLanguageModel
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
@@ -237,6 +239,10 @@ class Predicions:
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+        print(
+            f"Dispositivo utilizado: {self.device}.\nModelo: {model['model']}.\nTipo de modelo: {model['model_type']}."
+        )
+
         self.dataset_loader = DatasetLoader()
 
         self.model_data = model
@@ -268,14 +274,28 @@ class Predicions:
             )
         else:
             # subistituir pela combinação do langchain com huggingface para usar os modelos locais com ft
-            # Carregar tokenizer e modelo
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+            self.model = None
+            self.tokenizer = None
 
             if self.model_data["model_type"] == "seq2seq" and self.model_path:
-                # Carregar o modelo
+                # Carregar tokenizer e modelo
                 self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_path)
+                self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
             else:
-                self.model = AutoModelForCausalLM.from_pretrained(self.model_path)
+                self.model, self.tokenizer = FastLanguageModel.from_pretrained(
+                    model_name=self.model_path,
+                    max_seq_length=2048,  # Ajuste conforme necessário
+                    max_new_tokens=self.model_data['max_completition_tokens'],
+                    # dtype=None,           # O Unsloth detecta automaticamente o tipo de dado
+                    load_in_4bit=True,     # Ativa a quantização de 4 bits para economia de memória
+                    dtype=torch.float32,
+                    device_map="auto",    # Distribui automaticamente o modelo entre as GPUs disponíveis
+                    trust_remote_code=True,  # Permite o uso de código remoto confiável
+                    use_exact_model_name=True,  # Usa o nome exato do modelo
+                    fast_inference=False,  # Ativa a inferência rápida
+                )
+                self.model = self.model.to(self.device)
+                FastLanguageModel.for_inference(self.model)  # Habilita a inferência otimizada
 
             # self.model = self.model.to(self.device)
 
@@ -284,13 +304,16 @@ class Predicions:
                 model=self.model,
                 tokenizer=self.tokenizer,
                 max_new_tokens=self.model_data["max_completition_tokens"],
-                device_map="auto",
+                device_map=0,
+                framework="pt",  # Especifica o uso do PyTorch
+                device=self.device,  # Define o dispositivo (CPU ou GPU)
+                torch_dtype=torch.float32  # Define explicitamente o tipo de dado
             )
 
             self.model = HuggingFacePipeline(pipeline=pipe)
 
     def __get_prompt(self):
-        if not self.model_data["local"] or self.model_data["model_type"] in ["llm", "causal"]:
+        if not self.model_data["local"] or "gemma" not in self.model_data['model'] or self.model_data["model_type"] in ["llm", "causal"]:
             msgs = [
                 (
                     "system",
@@ -317,12 +340,12 @@ class Predicions:
 if __name__ == "__main__":
     predictions = []
 
-    model = MODELS["gemini-1.5-pro"]
+    model = MODELS["unsloth/gemma-3-1b-it-bnb-4bit"]
     DELAY = 30
     DIR = (
         OUTPUT_MODEL
         if model["local"]
-        else f"{OUTPUT_COMMERCIAL_MODEL_PREDICTIONS}{model["model"].replace(':', '-').replace('/', '-').replace('.', '-')}"
+        else f"{OUTPUT_COMMERCIAL_MODEL_PREDICTIONS}{model['model'].replace(':', '-').replace('/', '-').replace('.', '-')}"
     )
 
     model_path = None
@@ -378,8 +401,5 @@ if __name__ == "__main__":
         f.write(json.dumps(predictions, indent=4))
 
     print(
-        f"Predictions saved on {os.path.join(
-            DIR,
-            "predictions.json",
-        )}! "
+        f"Predictions saved on {os.path.join(DIR, 'predictions.json',)}! "
     )
