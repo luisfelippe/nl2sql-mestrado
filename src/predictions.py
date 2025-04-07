@@ -185,53 +185,6 @@ MODELS = {
 # reacall alto signinifca pouca precisão
 # TODO usar pelo langchain os modelos gemma 2 e 9b e lhama 1, 3 e 8b pelo huggingface
 
-
-# class Predictions:
-#     """Classe responsável por gerar as predições do modelo."""
-
-#     def __init__(self, model: dict, model_path=None):
-#         # Definir dispositivo: GPU se disponível, caso contrário CPU
-#         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#         self.model_data = model
-#         self.model_path = model_path
-
-#         self.dataset_loader = DatasetLoader()
-
-#     def _load_model(self):
-#         # Carregar o tokenizer
-#         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-
-#         if self.model_data["model_type"] == "seq2seq" and model_path:
-#             # Carregar o modelo
-#             self.model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
-#         else:
-#             self.model = AutoModelForCausalLM.from_pretrained(model_path)
-
-#         self.model = self.model.to(self.device)
-
-#         pipe = pipeline(
-#             "text-generation",
-#             model=self.model,
-#             tokenizer=self.tokenizer,
-#             max_new_tokens=self.model_data["max_completition_tokens"],
-#             device_map="auto",
-#         )
-
-#         self.model = HuggingFacePipeline(pipeline=pipe)
-
-#     def use_ajusted_model(self, text):
-#         """Gerar predições do modelo."""
-
-#         prompt = ChatPromptTemplate.from_template(text)
-
-#         # Criar o pipeline de predição
-#         chain = prompt | self.model | StrOutputParser()
-
-#         saida = chain.invoke({})
-
-#         return saida
-
-
 class Predicions:
     """Classe responsável por gerar as predições com modelos comerciais."""
 
@@ -250,6 +203,9 @@ class Predicions:
         self.model_path = model_path
         self.tokenizer = None
 
+        # define se a casse utilizada será a do unsloth ou a do huggingface
+        self.use_unsloth = True 
+
     def _load_model(self):
         if not self.model_data["local"]:
             # subistituir pala classe OpenAI do langchain só alterando a url da API e nome do modelo
@@ -264,38 +220,37 @@ class Predicions:
             )
 
         elif self.model_data["zero_shot"]:
-            # subistituir pela combinação do langchain com huggingface para baixar e usar os modelos sem ft
-            # Carregamento direto de um modelo
-            self.model = HuggingFacePipeline.from_model_id(
-                model_id=self.model_data["model"],
-                task="text-generation",
-                device_map="auto",
-                verbose=True,
-            )
-        else:
             # subistituir pela combinação do langchain com huggingface para usar os modelos locais com ft
             self.model = None
             self.tokenizer = None
 
-            if self.model_data["model_type"] == "seq2seq" and self.model_path:
-                # Carregar tokenizer e modelo
-                self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_path)
-                self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-            else:
+            if self.use_unsloth:
+                print("Usando o modelo com unsloth")
                 self.model, self.tokenizer = FastLanguageModel.from_pretrained(
-                    model_name=self.model_path,
+                    model_name=self.model_data['model'],
                     max_seq_length=2048,  # Ajuste conforme necessário
-                    max_new_tokens=self.model_data['max_completition_tokens'],
+                    # max_new_tokens=self.model_data['max_completition_tokens'],
                     # dtype=None,           # O Unsloth detecta automaticamente o tipo de dado
                     load_in_4bit=True,     # Ativa a quantização de 4 bits para economia de memória
-                    dtype=torch.float32,
+                    # dtype=torch.float32,
                     device_map="auto",    # Distribui automaticamente o modelo entre as GPUs disponíveis
                     trust_remote_code=True,  # Permite o uso de código remoto confiável
                     use_exact_model_name=True,  # Usa o nome exato do modelo
                     fast_inference=False,  # Ativa a inferência rápida
                 )
-                self.model = self.model.to(self.device)
+                # self.model = self.model.to(self.device)
                 FastLanguageModel.for_inference(self.model)  # Habilita a inferência otimizada
+            else:
+                print("Usando o modelo com huggingface")
+                self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+
+                if self.model_data["model_type"] == "seq2seq" and self.model_path:
+                    print("Usando o modelo seq2seq")
+                    # Carregar tokenizer e modelo
+                    self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_path)
+                else:
+                    print("Usando o modelo causal")
+                    self.model = AutoModelForCausalLM.from_pretrained(self.model_path)
 
             # self.model = self.model.to(self.device)
 
@@ -303,11 +258,11 @@ class Predicions:
                 "text-generation",
                 model=self.model,
                 tokenizer=self.tokenizer,
-                max_new_tokens=self.model_data["max_completition_tokens"],
-                device_map=0,
+                max_new_tokens=self.model_data["max_completition_tokens"], 
+                device_map="auto",
                 framework="pt",  # Especifica o uso do PyTorch
-                device=self.device,  # Define o dispositivo (CPU ou GPU)
-                torch_dtype=torch.float32  # Define explicitamente o tipo de dado
+                # device=self.device,  # Define o dispositivo (CPU ou GPU)
+                # torch_dtype=torch.float32  # Define explicitamente o tipo de dado
             )
 
             self.model = HuggingFacePipeline(pipeline=pipe)
@@ -340,8 +295,8 @@ class Predicions:
 if __name__ == "__main__":
     predictions = []
 
-    model = MODELS["unsloth/gemma-3-1b-it-bnb-4bit"]
-    DELAY = 30
+    model = MODELS["unsloth/gemma-2-2b-it-bnb-4bit"]
+    DELAY = 0
     DIR = (
         OUTPUT_MODEL
         if model["local"]

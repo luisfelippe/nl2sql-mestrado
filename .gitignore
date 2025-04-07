@@ -2,6 +2,7 @@
 .env
 .idea
 .venv*
+/unsloth_compiled_cache/*
 
 /models/*
 /data/*
