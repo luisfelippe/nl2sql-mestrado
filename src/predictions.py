@@ -305,7 +305,7 @@ class Predicions:
 if __name__ == "__main__":
     predictions = []
 
-    model = MODELS["unsloth/gemma-2-2b-it-bnb-4bit"]
+    model = MODELS["unsloth/granite-3.2-8b-instruct-bnb-4bit"]
     DELAY = 0
     DIR = (
         OUTPUT_MODEL
