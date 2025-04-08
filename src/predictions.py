@@ -309,7 +309,7 @@ if __name__ == "__main__":
     DELAY = 0
     DIR = (
         OUTPUT_MODEL
-        if model["local"]
+        if model["local"] and not model["zero_shot"]
         else f"{OUTPUT_COMMERCIAL_MODEL_PREDICTIONS}{model['model'].replace(':', '-').replace('/', '-').replace('.', '-')}"
     )
 
@@ -352,7 +352,6 @@ if __name__ == "__main__":
         # invoca garbage collection
         # torch.cuda.empty_cache()
         gc.collect()
-
 
     progress_bar.close()
 
