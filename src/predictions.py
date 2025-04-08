@@ -1,5 +1,6 @@
 """Script responsável por gerar as predições do modelo."""
 
+import gc
 import json
 import os
 import time
@@ -76,7 +77,6 @@ MODELS = {
     },
     # TODO modelos da openai
     # TODO modelos lhama
-
     ## huggingface
     # "ibm-granite/granite-3.2-8b-instruct": {
     "unsloth/granite-3.2-8b-instruct-bnb-4bit": {
@@ -185,6 +185,7 @@ MODELS = {
 # reacall alto signinifca pouca precisão
 # TODO usar pelo langchain os modelos gemma 2 e 9b e lhama 1, 3 e 8b pelo huggingface
 
+
 class Predicions:
     """Classe responsável por gerar as predições com modelos comerciais."""
 
@@ -204,9 +205,12 @@ class Predicions:
         self.tokenizer = None
 
         # define se a casse utilizada será a do unsloth ou a do huggingface
-        self.use_unsloth = True 
+        self.use_unsloth = True
 
     def _load_model(self):
+        if self.model:
+            return
+
         if not self.model_data["local"]:
             # subistituir pala classe OpenAI do langchain só alterando a url da API e nome do modelo
             self.model = ChatOpenAI(
@@ -227,19 +231,21 @@ class Predicions:
             if self.use_unsloth:
                 print("Usando o modelo com unsloth")
                 self.model, self.tokenizer = FastLanguageModel.from_pretrained(
-                    model_name=self.model_data['model'],
+                    model_name=self.model_data["model"],
                     max_seq_length=2048,  # Ajuste conforme necessário
                     # max_new_tokens=self.model_data['max_completition_tokens'],
                     # dtype=None,           # O Unsloth detecta automaticamente o tipo de dado
-                    load_in_4bit=True,     # Ativa a quantização de 4 bits para economia de memória
+                    load_in_4bit=True,  # Ativa a quantização de 4 bits para economia de memória
                     # dtype=torch.float32,
-                    device_map="auto",    # Distribui automaticamente o modelo entre as GPUs disponíveis
-                    trust_remote_code=True,  # Permite o uso de código remoto confiável
+                    device_map="auto",  # Distribui automaticamente o modelo entre as GPUs disponíveis
+                    # trust_remote_code=True,  # Permite o uso de código remoto confiável
                     use_exact_model_name=True,  # Usa o nome exato do modelo
                     fast_inference=False,  # Ativa a inferência rápida
                 )
                 # self.model = self.model.to(self.device)
-                FastLanguageModel.for_inference(self.model)  # Habilita a inferência otimizada
+                FastLanguageModel.for_inference(
+                    self.model
+                )  # Habilita a inferência otimizada
             else:
                 print("Usando o modelo com huggingface")
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
@@ -258,7 +264,7 @@ class Predicions:
                 "text-generation",
                 model=self.model,
                 tokenizer=self.tokenizer,
-                max_new_tokens=self.model_data["max_completition_tokens"], 
+                max_new_tokens=self.model_data["max_completition_tokens"],
                 device_map="auto",
                 framework="pt",  # Especifica o uso do PyTorch
                 # device=self.device,  # Define o dispositivo (CPU ou GPU)
@@ -268,7 +274,11 @@ class Predicions:
             self.model = HuggingFacePipeline(pipeline=pipe)
 
     def __get_prompt(self):
-        if not self.model_data["local"] or "gemma" not in self.model_data['model'] or self.model_data["model_type"] in ["llm", "causal"]:
+        if (
+            not self.model_data["local"]
+            or "gemma" not in self.model_data["model"]
+            or self.model_data["model_type"] in ["llm", "causal"]
+        ):
             msgs = [
                 (
                     "system",
@@ -338,6 +348,12 @@ if __name__ == "__main__":
 
         progress_bar.update(1)
         time.sleep(DELAY)
+
+        # invoca garbage collection
+        # torch.cuda.empty_cache()
+        gc.collect()
+
+
     progress_bar.close()
 
     # Criar o diretório para salvar as predições
@@ -355,6 +371,4 @@ if __name__ == "__main__":
     ) as f:
         f.write(json.dumps(predictions, indent=4))
 
-    print(
-        f"Predictions saved on {os.path.join(DIR, 'predictions.json',)}! "
-    )
+    print(f"Predictions saved on {os.path.join(DIR, 'predictions.json',)}! ")
