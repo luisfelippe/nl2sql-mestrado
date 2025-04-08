@@ -1,6 +1,9 @@
 """Variáveis de ambiente para configuração do treinamento e execução do modelo."""
 
 # Nome do dataset alvo, dentre os datasets listados em SQL_DATA_INFO
+import os
+
+
 DATASET_TARGET = "spider-pt"
 
 # idioma alvo do treinamento para filtro do dataset
@@ -20,7 +23,11 @@ NUM_EPOCHS = 10
 BATCH_SIZE = 1
 USE_FP16 = False
 
-BASE = "."
+BASE = (
+    "."
+    if os.environ.get("PROFILE", "local") == "local"
+    else "/content/drive/MyDrive/Mestrado/Projeto/nl2sql-mestrado"
+)
 
 DATA_PATH = f"{BASE}/data"
 DATA_OUTPUT_PATH = f"{DATA_PATH}/{DATASET_TARGET}-ajusted"
@@ -153,4 +160,3 @@ PARTIAL_TYPES = [
     "IUEN",
     "keywords",
 ]
-
