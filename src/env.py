@@ -4,10 +4,10 @@
 import os
 
 
-DATASET_TARGET = "spider-pt"
+DATASET_TARGET = "spider-en-pt"
 
 # idioma alvo do treinamento para filtro do dataset
-LANGUAGE_TARGET = "PT"
+LANGUAGE_TARGET = None # "PT"
 
 # MODEL = 'google/flan-t5-large' # quebrou com outofmemory no pytorch na linha de treinamento
 
