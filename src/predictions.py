@@ -300,12 +300,22 @@ class Predicions:
         chain = prompt | self.model | StrOutputParser()
 
         return chain.invoke({"input": text})
+    
+    def use_ajusted_model_batch(self, list_of_text):
+        """Gerar predições do modelo em lote."""
 
+        self._load_model()
+
+        prompt = self.__get_prompt()
+
+        chain = prompt | self.model | StrOutputParser()
+
+        return chain.batch([{"input": text} for text in list_of_text])
 
 if __name__ == "__main__":
     predictions = []
 
-    model = MODELS["unsloth/granite-3.2-8b-instruct-bnb-4bit"]
+    model = MODELS["unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit"]
     DELAY = 0
     DIR = (
         OUTPUT_MODEL
