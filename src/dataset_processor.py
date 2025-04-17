@@ -3,7 +3,7 @@
 import os
 import re
 import json
-import subprocess
+import uuid
 from tqdm import tqdm
 import jsonlines
 import spacy
@@ -201,6 +201,7 @@ class ProcessDataset:
                         context = db_dict[data[db_id_name]]
 
                         input_data = {
+                            "id": str(uuid.uuid4()),
                             "db_id": data[db_id_name],
                             "instruction": base_instruction.format(context),
                             "context": context,
@@ -256,6 +257,7 @@ class ProcessDataset:
                         input = INPUT_PROMPT.format(data["question"])
 
                         input_data = {
+                            "id": str(uuid.uuid4()),
                             "db_id": data[db_id_name],
                             "instruction": INSTRUCTION_PROMPT.format(create_statements),
                             "context": "\n".join(create_statements),
@@ -279,6 +281,7 @@ class ProcessDataset:
                         input = INPUT_PROMPT.format(data["question"])
                         context = db_dict[data[db_id_name]]
                         input_data = {
+                            "id": str(uuid.uuid4()),
                             "db_id": data[db_id_name],
                             "instruction": base_instruction.format(context),
                             "context": context,

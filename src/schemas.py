@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class PredictionModel(BaseModel):
     """Modelo de predição."""
 
+    id: str
     db_id: str
     difficulty: Literal["easy", "medium", "hard", "extra hard"]
     instruction: str

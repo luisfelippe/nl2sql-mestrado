@@ -2,7 +2,11 @@
 
 # Nome do dataset alvo, dentre os datasets listados em SQL_DATA_INFO
 import os
+from dotenv import load_dotenv
+# Load environment variables from the .env file (if present)
+load_dotenv()
 
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 DATASET_TARGET = "spider-en-pt"
 
@@ -95,6 +99,173 @@ SQL_DATA_INFO = {
     #     "output_name": "SQL",
     #     "is_multiple_turn": False,
     # }
+}
+
+MODELS = {
+    "gemini-2.0-flash": {
+        "model": "gemini-2.0-flash",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "api_key": GEMINI_API_KEY,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": False,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    "gemini-1.5-flash": {
+        "model": "gemini-1.5-flash",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "api_key": GEMINI_API_KEY,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": False,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    "gemini-1.5-pro": {
+        "model": "gemini-1.5-pro",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "api_key": GEMINI_API_KEY,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": False,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    "gemma-3-27b-it": {
+        "model": "gemma-3-27b-it",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "api_key": GEMINI_API_KEY,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": False,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    # TODO modelos da openai
+    # TODO modelos lhama
+    ## huggingface
+    # "ibm-granite/granite-3.2-8b-instruct": {
+    "unsloth/granite-3.2-8b-instruct-bnb-4bit": {
+        "model": "unsloth/granite-3.2-8b-instruct-bnb-4bit",
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    "unsloth/gemma-3-1b-it-bnb-4bit": {
+        "model": "unsloth/gemma-3-1b-it-bnb-4bit",
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    "unsloth/gemma-3-4b-it-bnb-4bit": {
+        "model": "unsloth/gemma-3-4b-it-bnb-4bit",
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    "unsloth/gemma-3-12b-it-bnb-4bit": {
+        "model": "unsloth/gemma-3-12b-it-bnb-4bit",
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    "unsloth/gemma-3-27b-it-bnb-4bit": {
+        "model": "unsloth/gemma-3-27b-it-bnb-4bit",
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    "unsloth/gemma-2-2b-it-bnb-4bit": {
+        "model": "unsloth/gemma-2-2b-it-bnb-4bit",
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    "unsloth/gemma-2-9b-it-bnb-4bit": {
+        "model": "unsloth/gemma-2-9b-it-bnb-4bit",
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit": {
+        "model": "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit",
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": True,
+        "model_type": "llm",
+    },
+    "google/flan-t5-small": {
+        "model": "google/flan-t5-small",
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": True,
+        "model_type": "seq2seq",
+    },
+    "google/flan-t5-base": {
+        "model": "google/flan-t5-base",
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": True,
+        "model_type": "seq2seq",
+    },
+    "ft-seq2seq": {
+        "model": "ft-seq2seq",
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": False,
+        "model_type": "seq2seq",
+    },
+    "ft-causal": {
+        "model": None,
+        "base_url": None,
+        "api_key": None,
+        "temperature": 0,
+        "max_completition_tokens": 512,
+        "local": True,
+        "zero_shot": False,
+        "model_type": "causal",
+    },
 }
 
 INSTRUCTION_PROMPT = """\

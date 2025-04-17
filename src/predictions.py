@@ -16,170 +16,15 @@ from transformers import (
     AutoModelForCausalLM,
     pipeline,
 )
-from dotenv import load_dotenv
 
-# from langchain_google_genai import ChatGoogleGenerativeAI
-
-from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_ollama import ChatOllama
+
 
 from src.dataset_loader import DatasetLoader
-from src.env import OUTPUT_COMMERCIAL_MODEL_PREDICTIONS, OUTPUT_MODEL
+from src.env import OUTPUT_COMMERCIAL_MODEL_PREDICTIONS, OUTPUT_MODEL, MODELS
 from src.schemas import PredictionModel
-
-# Load environment variables from the .env file (if present)
-load_dotenv()
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-MODELS = {
-    "gemini-2.0-flash": {
-        "model": "gemini-2.0-flash",
-        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-        "api_key": GEMINI_API_KEY,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": False,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    "gemini-1.5-flash": {
-        "model": "gemini-1.5-flash",
-        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-        "api_key": GEMINI_API_KEY,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": False,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    "gemini-1.5-pro": {
-        "model": "gemini-1.5-pro",
-        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-        "api_key": GEMINI_API_KEY,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": False,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    "gemma-3-27b-it": {
-        "model": "gemma-3-27b-it",
-        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-        "api_key": GEMINI_API_KEY,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": False,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    # TODO modelos da openai
-    # TODO modelos lhama
-    ## huggingface
-    # "ibm-granite/granite-3.2-8b-instruct": {
-    "unsloth/granite-3.2-8b-instruct-bnb-4bit": {
-        "model": "unsloth/granite-3.2-8b-instruct-bnb-4bit",
-        "base_url": None,
-        "api_key": None,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": True,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    "unsloth/gemma-3-1b-it-bnb-4bit": {
-        "model": "unsloth/gemma-3-1b-it-bnb-4bit",
-        "base_url": None,
-        "api_key": None,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": True,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    "unsloth/gemma-3-4b-it-bnb-4bit": {
-        "model": "unsloth/gemma-3-4b-it-bnb-4bit",
-        "base_url": None,
-        "api_key": None,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": True,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    "unsloth/gemma-3-12b-it-bnb-4bit": {
-        "model": "unsloth/gemma-3-12b-it-bnb-4bit",
-        "base_url": None,
-        "api_key": None,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": True,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    "unsloth/gemma-3-27b-it-bnb-4bit": {
-        "model": "unsloth/gemma-3-27b-it-bnb-4bit",
-        "base_url": None,
-        "api_key": None,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": True,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    "unsloth/gemma-2-2b-it-bnb-4bit": {
-        "model": "unsloth/gemma-2-2b-it-bnb-4bit",
-        "base_url": None,
-        "api_key": None,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": True,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    "unsloth/gemma-2-9b-it-bnb-4bit": {
-        "model": "unsloth/gemma-2-9b-it-bnb-4bit",
-        "base_url": None,
-        "api_key": None,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": True,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit": {
-        "model": "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit",
-        "base_url": None,
-        "api_key": None,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": True,
-        "zero_shot": True,
-        "model_type": "llm",
-    },
-    "ft-seq2seq": {
-        "model": "ft-seq2seq",
-        "base_url": None,
-        "api_key": None,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": True,
-        "zero_shot": False,
-        "model_type": "seq2seq",
-    },
-    "ft-causal": {
-        "model": None,
-        "base_url": None,
-        "api_key": None,
-        "temperature": 0,
-        "max_completition_tokens": 512,
-        "local": True,
-        "zero_shot": False,
-        "model_type": "causal",
-    },
-}
+from src.format import format as format_sql
 
 # TODO Gemma não aceita sistem prompt
 # reacall alto signinifca pouca precisão
@@ -201,11 +46,11 @@ class Predicions:
 
         self.model_data = model
         self.model = None
-        self.model_path = model_path
+        self.model_path = model_path if model['model_type'] != "seq2seq" else model['model']
         self.tokenizer = None
 
         # define se a casse utilizada será a do unsloth ou a do huggingface
-        self.use_unsloth = True
+        self.use_unsloth = model['model_type'] != "seq2seq"
 
     def _load_model(self):
         if self.model:
@@ -312,10 +157,21 @@ class Predicions:
 
         return chain.batch([{"input": text} for text in list_of_text])
 
+# def format(text):
+#     # remove o markdown do sql
+#     text = text.replace("```sql", " ").replace("```", " ").replace("\n", " ")
+#     # remove os espaços em branco duplicados
+#     text = " ".join(text.split())
+#     # remove os espaços em branco no início e no final da string
+#     text = text.strip()
+
+#     return text
+
+
 if __name__ == "__main__":
     predictions = []
 
-    model = MODELS["unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit"]
+    model = MODELS["google/flan-t5-base"]
     DELAY = 0
     DIR = (
         OUTPUT_MODEL
@@ -327,6 +183,23 @@ if __name__ == "__main__":
     if model["local"]:
         model_path = os.path.join(OUTPUT_MODEL, "")
 
+    # Criar o diretório para salvar as predições
+    if not os.path.exists(DIR):
+        os.makedirs(DIR)
+
+    predictions_file = os.path.join(
+        DIR,
+        "predictions.json",
+    )
+
+    # Tenta carregar as predições existentes, se o arquivo existir
+    if os.path.exists(predictions_file):
+        with open(predictions_file, "r", encoding="utf8") as f:
+            try:
+                predictions = json.load(f)
+            except json.JSONDecodeError:
+                predictions = []
+
     print(f"Realizando predições com modelo \"{model['model']}\".")
 
     pred = Predicions(model, model_path=model_path)
@@ -337,7 +210,15 @@ if __name__ == "__main__":
         total=len(dataset["test"]), desc="Gerando Predições...", colour="red"
     )
 
+    # Converte a lista de predições existente para facilitar consulta
+    existing_ids = {item["id"] for item in predictions if "id" in item}
+
     for data in dataset["test"]:
+        # Se o ID já está nas predições, pula esta amostra
+        if data["id"] in existing_ids:
+            progress_bar.update(1)
+            continue
+
         if model["local"] and model["model_type"] == "seq2seq":
             instruction = "###Context:\n" + data["context"] + "\n\n###Response: "
         else:
@@ -352,12 +233,20 @@ if __name__ == "__main__":
                 instruction=instruction,
                 nl=data["input"],
                 sql_expected=data["output"],
-                sql_predicted=pred.use_ajusted_model(X),
+                sql_predicted=format_sql(pred.use_ajusted_model(X)),
+                id=data["id"]
             ).model_dump()
         )
+        existing_ids.add(data["id"])
+
+        with open(os.path.join(DIR, "predictions.json"), "w", encoding="utf8") as f:
+            f.write(json.dumps(predictions, indent=4))
 
         progress_bar.update(1)
-        time.sleep(DELAY)
+
+        if DELAY > 0:
+            # aguarda o tempo definido para evitar sobrecarga no modelo
+            time.sleep(DELAY)
 
         # invoca garbage collection
         # torch.cuda.empty_cache()
@@ -368,16 +257,5 @@ if __name__ == "__main__":
     # Criar o diretório para salvar as predições
     if not os.path.exists(DIR):
         os.makedirs(DIR)
-
-    # Escrever o JSON em um arquivo
-    with open(
-        os.path.join(
-            DIR,
-            "predictions.json",
-        ),
-        "w",
-        encoding="utf8",
-    ) as f:
-        f.write(json.dumps(predictions, indent=4))
 
     print(f"Predictions saved on {os.path.join(DIR, 'predictions.json',)}! ")
